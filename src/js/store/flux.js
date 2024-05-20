@@ -1,44 +1,80 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			planets: [],
+			people: [],
+			vehicles: []
 		},
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+			getPeopleDetail: async (id) => {
+				await fetch(`https://www.swapi.tech/api/people/${id}`)
+					.then(res => res.json())
+					.then(data => {
+						const { result } = data;
+						const prevPeopleStore = getStore().people || [];
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+						setStore({ people: [...prevPeopleStore, { properties: result.properties, description: result.description, uid: result.uid }] })
+					})
+					.catch(err => console.error(err))
+			},
+			getPeople: async () => {
+				await fetch("https://www.swapi.tech/api/people/")
+					.then(res => res.json())
+					.then(data => {
+						const { results } = data;
+						const actions = getActions();
+						const promises = results.map(item => actions.getPeopleDetail(item.uid));
+						return Promise.all(promises);
+					})
+					.catch(err => console.error(err))
+			},
+			getVehicleDetail: async (id) => {
+				await fetch(`https://www.swapi.tech/api/vehicles/${id}`)
+					.then(res => res.json())
+					.then(data => {
+						const { result } = data;
+						const prevVehiclesStore = getStore().vehicle || [];
 
-				//reset the global store
-				setStore({ demo: demo });
+						setStore({ vehicles: [...prevVehiclesStore, { properties: result.properties, description: result.description, uid: result.uid }] })
+					})
+					.catch(err => console.error(err))
+			},
+			getVehicles: async () => {
+				await fetch("https://www.swapi.tech/api/vehicles/")
+					.then(res => res.json())
+					.then(data => {
+						const { results } = data;
+						const actions = getActions();
+						const promises = results.map(item => actions.getVehicleDetail(item.uid));
+						return Promise.all(promises);
+					})
+					.catch(err => console.error(err))
+			},
+			getPlanetDetail: async (id) => {
+				await fetch(`https://www.swapi.tech/api/planets/${id}`)
+					.then(res => res.json())
+					.then(data => {
+						const { result } = data;
+						const prevPlanetStore = getStore().planets || [];
+
+						setStore({ planets: [...prevPlanetStore, { properties: result.properties, description: result.description, uid: result.uid }] })
+					})
+					.catch(err => console.error(err))
+			},
+			getPlanets: async () => {
+				await fetch("https://www.swapi.tech/api/planets/")
+					.then(res => res.json())
+					.then(data => {
+						const { results } = data;
+						const actions = getActions();
+						const promises = results.map(item => actions.getPlanetDetail(item.uid));
+						return Promise.all(promises);
+					})
+					.catch(err => console.error(err))
 			}
+
 		}
+
 	};
 };
 
