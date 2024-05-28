@@ -3,9 +3,29 @@ const getState = ({ getStore, getActions, setStore }) => {
 		store: {
 			planets: [],
 			people: [],
-			vehicles: []
+			vehicles: [],
+			favorites: [],
+			peopleDetail: { properties: null, description: null, uid: null },
+			vehiclesDetail: { properties: null, description: null, uid: null },
+			planetsDetail: { properties: null, description: null, uid: null }
+
 		},
 		actions: {
+			addFavorites: (name) => {
+				const store = getStore();
+				if (!store.favorites.includes(name)) {
+					const favorite = store.favorites.concat(name);
+					setStore({ ...store, favorites: favorite });
+				}
+			},
+			removeFavorites: (name) => {
+				const sto = getStore();
+				const favorite = sto.favorites.filter(el =>
+					el.name !== name
+				);
+				setStore({ favorites: favorite });
+
+			},
 			getPeopleDetail: async (id) => {
 				await fetch(`https://www.swapi.tech/api/people/${id}`)
 					.then(res => res.json())
@@ -13,7 +33,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						const { result } = data;
 						const prevPeopleStore = getStore().people || [];
 
-						setStore({ people: [...prevPeopleStore, { properties: result.properties, description: result.description, uid: result.uid }] })
+						setStore({ people: [...prevPeopleStore, { properties: result.properties, description: result.description, uid: result.uid, type: 'people' }] })
 					})
 					.catch(err => console.error(err))
 			},
@@ -33,9 +53,9 @@ const getState = ({ getStore, getActions, setStore }) => {
 					.then(res => res.json())
 					.then(data => {
 						const { result } = data;
-						const prevVehiclesStore = getStore().vehicle || [];
+						const prevVehiclesStore = getStore().vehicles || [];
 
-						setStore({ vehicles: [...prevVehiclesStore, { properties: result.properties, description: result.description, uid: result.uid }] })
+						setStore({ vehicles: [...prevVehiclesStore, { properties: result.properties, description: result.description, uid: result.uid, type: 'vehicles' }] })
 					})
 					.catch(err => console.error(err))
 			},
@@ -57,7 +77,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 						const { result } = data;
 						const prevPlanetStore = getStore().planets || [];
 
-						setStore({ planets: [...prevPlanetStore, { properties: result.properties, description: result.description, uid: result.uid }] })
+						setStore({ planets: [...prevPlanetStore, { properties: result.properties, description: result.description, uid: result.uid, type: 'planets' }] })
 					})
 					.catch(err => console.error(err))
 			},
